@@ -1,6 +1,6 @@
 # Logger Module
 # Business logic obtained from https://www.toptal.com/python/in-depth-python-logging
-# This is an advanced generic logger to log the operations of the program, for debug purposes
+# This is a logger wrapper to log the operations of the program, for debug purposes
 import sys
 import logging
 from logging.handlers import TimedRotatingFileHandler
@@ -11,13 +11,13 @@ FORMATTER = logging.Formatter(LOG_FORMAT)
 LOG_FILE = "composer_or_pasta.log"
 
 
-def get_console_handler():
+def get_console_handler() -> logging.Handler:
 	console_handler = logging.StreamHandler(sys.stdout)
 	console_handler.setFormatter(FORMATTER)
 	return console_handler
 
 
-def get_file_handler():
+def get_file_handler() -> logging.Handler:
 	file_handler = TimedRotatingFileHandler(LOG_FILE, when='midnight')
 	file_handler.setFormatter(FORMATTER)
 	return file_handler
@@ -28,7 +28,7 @@ class NullHandler(logging.Handler):
 		pass
 
 
-def get_logger(logger_name):
+def get_logger(logger_name) -> logging.Logger:
 	logger = logging.getLogger(logger_name)
 	logger.setLevel(logging.DEBUG)  # better to have too much log than not enough
 
@@ -43,6 +43,6 @@ def get_logger(logger_name):
 	return logger
 
 
-def shutdown_logger():
+def shutdown_logger() -> None:
 	logging.shutdown()
 
