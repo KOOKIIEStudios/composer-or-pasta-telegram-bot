@@ -12,15 +12,17 @@ from telegram.ext import (
 )
 
 import logger
-import player_data_handler
+import data_handler
 
 
 kookiie_logger = logger.get_logger(__name__)
 kookiie_logger.info("COMPOSER OR PASTA TELEGRAM BOT")
 kookiie_logger.info("===============================")
 kookiie_logger.info("Logger successfully loaded in main.")
-data = player_data_handler.load_data()
-kookiie_logger.info("Saves loaded.")
+data = data_handler.load_player_data()
+COMPOSERS = data_handler.load_composer()
+PASTAS = data_handler.load_pasta()
+kookiie_logger.info("Data loaded.")
 
 
 def fetch_token() -> str:
@@ -42,12 +44,18 @@ def start(update: Update, context: CallbackContext) -> None:
 def populate(update: Update, context: CallbackContext) -> None:
 	"""Populate player data with random details (TEMPORARY METHOD FOR TESTING)"""
 	data.update_player(314, "Pi", 159)
+	update.message.reply_text("Added placeholder data.")
+
+
+def saved_data(update: Update, context: CallbackContext) -> None:
+	"""Populate player data with random details (TEMPORARY METHOD FOR TESTING)"""
+	update.message.reply_text("Data: " + str(data))
 
 
 def save(update: Update, context: CallbackContext) -> None:
 	"""Save user data (TEMPORARY METHOD FOR TESTING)"""
 	update.message.reply_text("Attempt to save the data - check logs for details.")
-	player_data_handler.save_data(data)
+	data_handler.save_player_data(data)
 
 
 def unknown(update: Update, context: CallbackContext) -> None:
@@ -69,17 +77,18 @@ def main() -> None:
 
 	dispatcher.add_handler(CommandHandler("start", start))
 	dispatcher.add_handler(CommandHandler("save", save))
-	dispatcher.add_handler(CommandHandler("populate", populate()))
+	dispatcher.add_handler(CommandHandler("saved", saved_data))
+	dispatcher.add_handler(CommandHandler("populate", populate))
 	# TODO: Insert conversation handler here
 	dispatcher.add_handler(MessageHandler(Filters.command, unknown))
 
 	# Start the Bot
-	# updater.start_polling()
+	updater.start_polling()
 
 	# Run the bot until you press Ctrl-C or the process receives SIGINT,
 	# SIGTERM or SIGABRT. This should be used most of the time, since
 	# start_polling() is non-blocking and will stop the bot gracefully.
-	# updater.idle()
+	updater.idle()
 
 
 if __name__ == "__main__":

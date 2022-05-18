@@ -136,3 +136,6 @@ dmypy.json
 
 # Telegram Bot token
 token.txt
+
+# Player save data
+player_data.yaml
