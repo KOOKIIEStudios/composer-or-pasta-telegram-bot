@@ -39,7 +39,11 @@ def start(update: Update, context: CallbackContext) -> None:
 
 def unknown(update: Update, context: CallbackContext) -> None:
 	"""Handle unknown commands"""
-	context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, I didn't understand that command.")
+	context.bot.send_message(
+		chat_id=update.effective_chat.id,
+		text="""Hmm... I don't seem to recognise this command!
+		Perhaps I'm under the influence of the Confundus Charm..."""
+	)
 
 
 def main() -> None:
