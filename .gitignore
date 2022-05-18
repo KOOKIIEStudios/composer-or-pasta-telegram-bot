@@ -133,3 +133,6 @@ dmypy.json
 
 # log files
 *.log
+
+# Telegram Bot token
+token.txt
