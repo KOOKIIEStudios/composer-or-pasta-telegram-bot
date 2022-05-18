@@ -1,8 +1,5 @@
 """Simple bot implementation for the Composer or Pasta game
 """
-import logger
-
-
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
 	CallbackContext,
@@ -14,11 +11,16 @@ from telegram.ext import (
 	Updater,
 )
 
+import logger
+import player_data_handler
+
 
 kookiie_logger = logger.get_logger(__name__)
 kookiie_logger.info("COMPOSER OR PASTA TELEGRAM BOT")
 kookiie_logger.info("===============================")
 kookiie_logger.info("Logger successfully loaded in main.")
+data = player_data_handler.load_data()
+kookiie_logger.info("Saves loaded.")
 
 
 def fetch_token() -> str:
@@ -35,6 +37,17 @@ def fetch_token() -> str:
 def start(update: Update, context: CallbackContext) -> None:
 	"""Greet user when a user first talks to the bot"""
 	update.message.reply_text("To start a game, use the command /newgame")
+
+
+def populate(update: Update, context: CallbackContext) -> None:
+	"""Populate player data with random details (TEMPORARY METHOD FOR TESTING)"""
+	data.update_player(314, "Pi", 159)
+
+
+def save(update: Update, context: CallbackContext) -> None:
+	"""Save user data (TEMPORARY METHOD FOR TESTING)"""
+	update.message.reply_text("Attempt to save the data - check logs for details.")
+	player_data_handler.save_data(data)
 
 
 def unknown(update: Update, context: CallbackContext) -> None:
@@ -55,6 +68,8 @@ def main() -> None:
 	dispatcher = updater.dispatcher
 
 	dispatcher.add_handler(CommandHandler("start", start))
+	dispatcher.add_handler(CommandHandler("save", save))
+	dispatcher.add_handler(CommandHandler("populate", populate()))
 	# TODO: Insert conversation handler here
 	dispatcher.add_handler(MessageHandler(Filters.command, unknown))
 
