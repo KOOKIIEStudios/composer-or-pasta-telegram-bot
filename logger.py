@@ -1,6 +1,8 @@
-# Logger Module
-# Business logic obtained from https://www.toptal.com/python/in-depth-python-logging
-# This is a logger wrapper to log the operations of the program, for debug purposes
+"""Generic logger module
+
+Business logic obtained from https://www.toptal.com/python/in-depth-python-logging
+This is a logger wrapper to log the operations of the program, for debug purposes
+"""
 import sys
 import logging
 from logging.handlers import TimedRotatingFileHandler
@@ -24,11 +26,13 @@ def get_file_handler() -> logging.Handler:
 
 
 class NullHandler(logging.Handler):
+	"""Silent handler"""
+
 	def emit(self, record):
 		pass
 
 
-def get_logger(logger_name) -> logging.Logger:
+def get_logger(logger_name: str) -> logging.Logger:
 	logger = logging.getLogger(logger_name)
 	logger.setLevel(logging.DEBUG)  # better to have too much log than not enough
 
@@ -45,4 +49,3 @@ def get_logger(logger_name) -> logging.Logger:
 
 def shutdown_logger() -> None:
 	logging.shutdown()
-

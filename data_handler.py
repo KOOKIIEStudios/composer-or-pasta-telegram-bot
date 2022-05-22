@@ -1,5 +1,4 @@
 """Handle player data load/saves"""
-
 from pathlib import Path
 
 from ruamel.yaml import YAML
@@ -16,7 +15,9 @@ PASTA_DATA_DIRECTORY = Path(".", "pasta_data.yaml")
 yaml = YAML(typ="safe", pure=True)
 
 
-def load_data(path: Path) -> PlayerData | dict:
+def load_data(path: Path) -> dict:
+	"""Generic YAML loader"""
+
 	try:
 		with open(path, "r") as file_data:
 			data = yaml.load(file_data)

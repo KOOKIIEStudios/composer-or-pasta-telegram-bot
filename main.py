@@ -1,5 +1,4 @@
-"""Simple bot implementation for the Composer or Pasta game
-"""
+"""Simple bot implementation for the Composer or Pasta game"""
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
 	CallbackContext,

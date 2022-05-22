@@ -1,10 +1,10 @@
-"""The class PlayerData models the format for player data storage
-"""
+"""The class PlayerData models the format for player data storage"""
 
 
 class PlayerData(dict):
 	"""A dictionary with convenience methods for storing gameplay data"""
-	def update_player(self, user_id: int, name: str, high_score: int):
+
+	def update_player(self, user_id: int, name: str, high_score: int) -> None:
 		"""Adds/replaces entries in the dictionary, with the intended format"""
 		if user_id not in self:
 			self.update({
