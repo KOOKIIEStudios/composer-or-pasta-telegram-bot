@@ -1,12 +1,14 @@
 """Simple bot implementation for the Composer or Pasta game"""
-import telegram.ext
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+import random
+
+from telegram import Update
 from telegram.ext import (
 	CallbackContext,
 	CallbackQueryHandler,
 	CommandHandler,
 	ConversationHandler,
 	Filters,
+	InvalidCallbackData,
 	MessageHandler,
 	Updater,
 )
@@ -15,7 +17,6 @@ import data_handler
 import logger
 import keyboard_model
 from game import (
-	GameLength,
 	States,
 	Game,
 )
@@ -27,11 +28,16 @@ kookiie_logger.info("===============================")
 kookiie_logger.info("Logger successfully loaded in main.")
 data = data_handler.load_player_data()
 COMPOSERS = data_handler.load_composer()
+COMPOSER_KEYS = list(COMPOSERS.keys())
+kookiie_logger.info("Composer keys cached.")
 PASTAS = data_handler.load_pasta()
+PASTA_KEYS = list(PASTAS.keys())
+kookiie_logger.info("Pasta keys cached.")
 kookiie_logger.info("Data loaded.")
 active_games: list[Game] = []
 
 
+# Active game list-related functions ------------------------------------------
 def get_game(chat_id: int) -> Game | None:
 	"""Get a particular game from the list of active games"""
 	for game in active_games:
@@ -50,6 +56,18 @@ def add_player(chat_id: int, user_id: int, full_name: str) -> None:
 	active_games[chat_id].players[user_id] = full_name
 
 
+# Question/Answer generation: -------------------------------------------------
+def set_question(game: Game) -> None:
+	first_roll = random.randint(1, 100)
+	if first_roll > 80:  # arbitrary number; pasta
+		pasta = random.choice(PASTA_KEYS)
+		game.correct_answer = (keyboard_model.KeyboardText.PASTA, pasta)
+		return
+	composer = random.choice(COMPOSER_KEYS)
+	game.correct_answer = (keyboard_model.KeyboardText.COMPOSER, composer)
+
+
+# Main bot sequence -----------------------------------------------------------
 def fetch_token() -> str:
 	# Load token
 	with open("token.txt", "r") as token_file:
@@ -151,7 +169,7 @@ def get_length(update: Update, context: CallbackContext) -> int:
 
 	query.answer()  # clear the progress bar, if there was a query
 	rounds_per_player = query.data
-	if isinstance(rounds_per_player, telegram.ext.InvalidCallbackData):
+	if isinstance(rounds_per_player, InvalidCallbackData):
 		kookiie_logger.error("Invalid callback data!")
 		return States.GET_GAME_LENGTH
 	game = get_game(chat_id)
