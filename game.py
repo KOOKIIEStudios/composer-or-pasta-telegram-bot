@@ -17,7 +17,6 @@ class States(Enum):
 	SEND_INVITE: int = 0
 	GET_GAME_LENGTH: int = 1
 	CHECK_ANSWER: int = 2
-	GAME_ENDED: int = 3
 
 
 class Game:

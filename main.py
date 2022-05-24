@@ -83,23 +83,6 @@ def start(update: Update, context: CallbackContext) -> None:
 	update.message.reply_text("To start a game, use the command /newgame")
 
 
-def populate(update: Update, context: CallbackContext) -> None:
-	"""Populate player data with random details (TEMPORARY METHOD FOR TESTING)"""
-	data.update_player(314, "Pi", 159)
-	update.message.reply_text("Added placeholder data.")
-
-
-def saved_data(update: Update, context: CallbackContext) -> None:
-	"""Populate player data with random details (TEMPORARY METHOD FOR TESTING)"""
-	update.message.reply_text("Data: " + str(data))
-
-
-def save(update: Update, context: CallbackContext) -> None:
-	"""Save user data (TEMPORARY METHOD FOR TESTING)"""
-	update.message.reply_text("Attempt to save the data - check logs for details.")
-	data_handler.save_player_data(data)
-
-
 def handle_join_button(update: Update, context: CallbackContext) -> int:
 	"""Join button clicked"""
 	query = update.callback_query
@@ -189,7 +172,7 @@ def send_question(update: Update) -> int:
 	if not game:  # no active games - sanity check
 		kookiie_logger.error("No active games")
 	if game.is_ended():
-		return States.GAME_ENDED
+		return end_game(update)
 
 	set_question(game)
 	update.effective_chat.send_message(
@@ -204,12 +187,11 @@ def send_question(update: Update) -> int:
 def check_answer(update: Update, context: CallbackContext) -> int:
 	query = update.callback_query
 	user = query.from_user
-	chat_id = update.effective_chat.id
-	game = get_game(chat_id)
+	game = get_game(update.effective_chat.id)
 
 	query.answer()  # clear the progress bar, if there was a query
 	if not user.id == game.get_current_player():
-		kookiie_logger.debug(f"Wrong player clicked on an answer. Expected {game.get_current_player()}, Received {user.id}")
+		kookiie_logger.debug(f"Wrong player clicked on an answer. Expected {game.get_current_player_name()}, Received {user.full_name}")
 		return States.CHECK_ANSWER  # not the intended player for the round
 
 	if query.data == game.correct_answer[0]:
@@ -220,6 +202,24 @@ def check_answer(update: Update, context: CallbackContext) -> int:
 
 	game.increment_round_number()
 	return send_question(update)
+
+
+def end_game(update: Update) -> int:
+	game = get_game(update.effective_chat.id)
+	message = f"*GAME OVER*\nScores:\n"
+	for player_id, player_name in game.players.items():
+		# old_score = self.get(user_id).get("High score")
+		# 			new_score = high_score if high_score > old_score else old_score
+		optional = "    ___New High Score!_\r__" if game.scores.get(player_id) > data.get_player_high_score(player_id) else ""
+		message += f"*{player_name}_: {game.scores.get(player_id)}{optional}\n"
+	message += "\nThank you for playing!"
+	update.effective_chat.send_message(message)
+
+	# update scores to IO
+	for player_id, player_name in game.players.items():
+		data.update_player(player_id, player_name, game.scores.get(player_id))
+	data_handler.save_player_data(data)
+	return ConversationHandler.END
 
 
 def is_player(user_id: int, chat_id: int) -> bool:
@@ -249,7 +249,7 @@ def cancel(update: Update, context: CallbackContext) -> int | None:
 	# Cancel the current active game in the chat:
 	if is_player(user.id, chat_id):
 		kookiie_logger.info("User %s canceled the game/conversation.", user.full_name)
-		update.message.reply_text("The active game has been terminated")
+		update.message.reply_text("The active game has been terminated.")
 		return ConversationHandler.END
 
 	update.message.reply_text(
@@ -277,10 +277,6 @@ def main() -> None:
 	dispatcher = updater.dispatcher
 
 	dispatcher.add_handler(CommandHandler("start", start))
-	dispatcher.add_handler(CommandHandler("save", save))
-	dispatcher.add_handler(CommandHandler("saved", saved_data))
-	dispatcher.add_handler(CommandHandler("populate", populate))
-	# TODO: Insert conversation handler here
 	conversation_handler = ConversationHandler(
 		entry_points=[CommandHandler("newgame", start_new_game)],
 		states={
