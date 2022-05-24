@@ -12,6 +12,7 @@ from telegram.ext import (
 
 import data_handler
 import logger
+import keyboard_model
 from game import (
 	GameLength,
 	States,
@@ -36,6 +37,16 @@ def get_game(chat_id: int) -> Game | None:
 		if game.chat_id == chat_id:
 			return game
 	return None
+
+
+def get_user(chat_id: int, user_id: int) -> int | None:
+	"""Get a user from an active game"""
+	return active_games[chat_id].players.get(user_id)
+
+
+def add_player(chat_id: int, user_id: int, full_name: str) -> None:
+	"""Add a player to an active game"""
+	active_games[chat_id].players[user_id] = full_name
 
 
 def fetch_token() -> str:
@@ -71,6 +82,39 @@ def save(update: Update, context: CallbackContext) -> None:
 	data_handler.save_player_data(data)
 
 
+def handle_join_button(update: Update, context: CallbackContext) -> int:
+	"""Join button clicked"""
+	query = update.callback_query
+	user = query.from_user
+	chat_id = update.effective_chat.id
+
+	query.answer()  # clear the progress bar, if there was a query
+	add_player(chat_id, user.id, user.full_name)
+	return States.SEND_INVITE  # continue checking for joins
+
+
+def handle_start_button(update: Update, context: CallbackContext) -> int:
+	"""Show join/start game menu"""
+
+	query = update.callback_query
+	user = query.from_user
+	chat_id = update.effective_chat.id
+
+	if not get_user(chat_id, user.id):  # if player isn't in the game, assume they want to join
+		add_player(chat_id, user.id, user.full_name)
+	query.edit_message_text("Game started.")
+
+	return send_duration_menu(update)
+
+
+def send_duration_menu(update: Update):
+	update.effective_chat.send_message(
+		"Select the length/duration that you would like to play.",
+		reply_markup=keyboard_model.GAME_LENGTH_MENU,
+	)
+	return States.GET_GAME_LENGTH
+
+
 def start_new_game(update: Update, context: CallbackContext) -> int:
 	# Sanity checks:
 	if get_game(update.message.chat_id):
@@ -87,8 +131,14 @@ def start_new_game(update: Update, context: CallbackContext) -> int:
 		return ConversationHandler.END
 
 	# Start new game sequence:
+	active_games.append(Game(update.message.chat_id))
 	if chat_type == "private":
-		return States.GET_GAME_LENGTH
+		return send_duration_menu(update)
+	# if group/supergroup chat, offer multiplayer options:
+	update.message.reply_text(
+		"Tap 'Join' to join the game, and 'Start' once all players have joined.",
+		reply_markup=keyboard_model.JOIN_INVITE_MENU,
+	)
 	return States.SEND_INVITE  # Group/Supergroup chat
 
 
@@ -154,7 +204,10 @@ def main() -> None:
 	conversation_handler = ConversationHandler(
 		entry_points=[CommandHandler("newgame", start_new_game)],
 		states={
-
+			States.SEND_INVITE: [
+				CallbackQueryHandler(handle_join_button, pattern=f"^{keyboard_model.KeyboardText.JOIN}$"),
+				CallbackQueryHandler(handle_start_button, pattern=f"^{keyboard_model.KeyboardText.START}$"),
+			]
 		},
 		fallbacks=[CommandHandler('cancel', cancel)],
 	)
