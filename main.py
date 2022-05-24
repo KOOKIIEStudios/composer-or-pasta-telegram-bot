@@ -78,12 +78,30 @@ def fetch_token() -> str:
 	return token
 
 
-def start(update: Update, context: CallbackContext) -> None:
+def start(update: Update, _: CallbackContext) -> None:
 	"""Greet user when a user first talks to the bot"""
 	update.message.reply_text("To start a game, use the command /newgame")
 
 
-def handle_join_button(update: Update, context: CallbackContext) -> int:
+def get_player_high_score(update: Update, _: CallbackContext) -> None:
+	"""Send the highest score recorded for the player"""
+	player = data.get_player_high_score(update.message.from_user.id)
+	update.message.reply_text(
+		f"Hi, {player.get('Name')}.\n"
+		f"Your high score is: {player.get('High score')}, "
+		f"through a total of {player.get('Number of games played')} games."
+	)
+
+
+def get_high_score(update: Update, _: CallbackContext) -> None:
+	"""Send the highest score in the leaderboard"""
+	update.message.reply_text(
+		f"*The highest score in the leaderboard is:*\n{data.get_highest_score()}",
+		parse_mode="MarkdownV2",
+	)
+
+
+def handle_join_button(update: Update, _: CallbackContext) -> int:
 	"""Join button clicked"""
 	query = update.callback_query
 	user = query.from_user
@@ -94,7 +112,7 @@ def handle_join_button(update: Update, context: CallbackContext) -> int:
 	return States.SEND_INVITE  # continue checking for joins
 
 
-def handle_start_button(update: Update, context: CallbackContext) -> int:
+def handle_start_button(update: Update, _: CallbackContext) -> int:
 	"""Start button clicked"""
 	query = update.callback_query
 	user = query.from_user
@@ -109,6 +127,7 @@ def handle_start_button(update: Update, context: CallbackContext) -> int:
 
 
 def send_duration_menu(update: Update):
+	"""Let the user choose how many rounds to play"""
 	update.effective_chat.send_message(
 		"Select the length/duration that you would like to play.",
 		reply_markup=keyboard_model.GAME_LENGTH_MENU,
@@ -116,7 +135,11 @@ def send_duration_menu(update: Update):
 	return States.GET_GAME_LENGTH
 
 
-def start_new_game(update: Update, context: CallbackContext) -> int:
+def start_new_game(update: Update, _: CallbackContext) -> int:
+	"""Start a new game
+
+	Determine the chat type, and direct the bot to the appropriate course of action
+	"""
 	# Sanity checks:
 	if get_game(update.message.chat_id):
 		update.message.reply_text(
@@ -143,7 +166,7 @@ def start_new_game(update: Update, context: CallbackContext) -> int:
 	return States.SEND_INVITE
 
 
-def get_length(update: Update, context: CallbackContext) -> int:
+def get_length(update: Update, _: CallbackContext) -> int:
 	"""Determine the duration of the game"""
 	query = update.callback_query
 	chat_id = update.effective_chat.id
@@ -168,6 +191,7 @@ def get_length(update: Update, context: CallbackContext) -> int:
 
 
 def send_question(update: Update) -> int:
+	"""Generate a question, and send it to the chat"""
 	game = get_game(update.effective_chat.id)
 	if not game:  # no active games - sanity check
 		kookiie_logger.error("No active games")
@@ -184,7 +208,8 @@ def send_question(update: Update) -> int:
 	return States.CHECK_ANSWER
 
 
-def check_answer(update: Update, context: CallbackContext) -> int:
+def check_answer(update: Update, _: CallbackContext) -> int:
+	"""Check if the answer is correct, and handle the scoring"""
 	query = update.callback_query
 	user = query.from_user
 	game = get_game(update.effective_chat.id)
@@ -205,6 +230,7 @@ def check_answer(update: Update, context: CallbackContext) -> int:
 
 
 def end_game(update: Update) -> int:
+	"""Tabulate the results, and save it"""
 	game = get_game(update.effective_chat.id)
 	message = f"*GAME OVER*\nScores:\n"
 	for player_id, player_name in game.players.items():
@@ -233,7 +259,7 @@ def is_player(user_id: int, chat_id: int) -> bool:
 	return False
 
 
-def cancel(update: Update, context: CallbackContext) -> int | None:
+def cancel(update: Update, _: CallbackContext) -> int | None:
 	"""Cancels and ends the game/conversation."""
 	chat_id = update.message.chat_id
 	user = update.message.from_user
@@ -277,6 +303,8 @@ def main() -> None:
 	dispatcher = updater.dispatcher
 
 	dispatcher.add_handler(CommandHandler("start", start))
+	dispatcher.add_handler(CommandHandler("myhiscore", get_player_high_score))
+	dispatcher.add_handler(CommandHandler("hiscore", get_high_score))
 	conversation_handler = ConversationHandler(
 		entry_points=[CommandHandler("newgame", start_new_game)],
 		states={
