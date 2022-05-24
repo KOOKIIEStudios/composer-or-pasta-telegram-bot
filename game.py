@@ -47,7 +47,7 @@ class Game:
 			self.scores[player_id]: int = 0
 
 	def increment_round_number(self) -> None:
-		self.current_round = self.current_round + 1
+		self.current_round += 1
 
 	def is_ended(self) -> bool:
 		return self.total_rounds == self.current_round
@@ -57,3 +57,6 @@ class Game:
 
 	def get_current_player_name(self) -> str:
 		return self.players.get(self.get_current_player())
+
+	def increment_current_player_score(self) -> None:
+		self.scores[self.get_current_player()] += 1

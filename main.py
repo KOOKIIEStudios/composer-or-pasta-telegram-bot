@@ -8,7 +8,6 @@ from telegram.ext import (
 	CommandHandler,
 	ConversationHandler,
 	Filters,
-	InvalidCallbackData,
 	MessageHandler,
 	Updater,
 )
@@ -168,9 +167,6 @@ def get_length(update: Update, context: CallbackContext) -> int:
 
 	query.answer()  # clear the progress bar, if there was a query
 	rounds_per_player = query.data
-	if isinstance(rounds_per_player, InvalidCallbackData):
-		kookiie_logger.error("Invalid callback data!")
-		return States.GET_GAME_LENGTH
 	game = get_game(chat_id)
 	game.set_total_rounds(rounds_per_player)
 	game.initialise_order()
@@ -203,6 +199,27 @@ def send_question(update: Update) -> int:
 	)
 	game.increment_round_number()
 	return States.CHECK_ANSWER
+
+
+def check_answer(update: Update, context: CallbackContext) -> int:
+	query = update.callback_query
+	user = query.from_user
+	chat_id = update.effective_chat.id
+	game = get_game(chat_id)
+
+	query.answer()  # clear the progress bar, if there was a query
+	if not user.id == game.get_current_player():
+		kookiie_logger.debug(f"Wrong player clicked on an answer. Expected {game.get_current_player()}, Received {user.id}")
+		return States.CHECK_ANSWER  # not the intended player for the round
+
+	if query.data == game.correct_answer[0]:
+		game.increment_current_player_score()
+		query.edit_message_text("That is the correct answer!")
+	else:
+		query.edit_message_text("Aww.. I'm afraid that's not correct.")
+
+	game.increment_round_number()
+	return send_question(update)
 
 
 def is_player(user_id: int, chat_id: int) -> bool:
@@ -272,9 +289,11 @@ def main() -> None:
 				CallbackQueryHandler(handle_start_button, pattern=f"^{keyboard_model.KeyboardText.START}$"),
 			],
 			States.GET_GAME_LENGTH: [CallbackQueryHandler(get_length)],
+			States.CHECK_ANSWER: [CallbackQueryHandler(check_answer)],
 		},
 		fallbacks=[CommandHandler('cancel', cancel)],
 	)
+	dispatcher.add_handler(conversation_handler)  # For update-handling
 	dispatcher.add_handler(MessageHandler(Filters.command, unknown))
 
 	# Start the Bot
