@@ -1,4 +1,5 @@
 """Simple bot implementation for the Composer or Pasta game"""
+import telegram.ext
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
 	CallbackContext,
@@ -94,12 +95,12 @@ def handle_join_button(update: Update, context: CallbackContext) -> int:
 
 
 def handle_start_button(update: Update, context: CallbackContext) -> int:
-	"""Show join/start game menu"""
-
+	"""Start button clicked"""
 	query = update.callback_query
 	user = query.from_user
 	chat_id = update.effective_chat.id
 
+	query.answer()  # clear the progress bar, if there was a query
 	if not get_user(chat_id, user.id):  # if player isn't in the game, assume they want to join
 		add_player(chat_id, user.id, user.full_name)
 	query.edit_message_text("Game started.")
@@ -139,7 +140,35 @@ def start_new_game(update: Update, context: CallbackContext) -> int:
 		"Tap 'Join' to join the game, and 'Start' once all players have joined.",
 		reply_markup=keyboard_model.JOIN_INVITE_MENU,
 	)
-	return States.SEND_INVITE  # Group/Supergroup chat
+	return States.SEND_INVITE
+
+
+def get_length(update: Update, context: CallbackContext) -> int:
+	"""Determine the duration of the game"""
+	query = update.callback_query
+	user = query.from_user
+	chat_id = update.effective_chat.id
+
+	query.answer()  # clear the progress bar, if there was a query
+	rounds_per_player = query.data
+	if isinstance(rounds_per_player, telegram.ext.InvalidCallbackData):
+		kookiie_logger.error("Invalid callback data!")
+		return States.GET_GAME_LENGTH
+	game = get_game(chat_id)
+	game.set_total_rounds(rounds_per_player)
+	game.initialise_order()
+	game.initialise_scores()
+
+	new_message = f"*Game Duration:* {rounds_per_player}\n*Players:*\n```\n"
+	for player in game.players.values():
+		new_message += f"{player}\n"
+	new_message += "```"
+
+	query.edit_message_text(
+		new_message,
+		parse_mode="MarkdownV2",
+	)
+	return States.SEND_QUESTION
 
 
 def is_player(user_id: int, chat_id: int) -> bool:
@@ -207,7 +236,8 @@ def main() -> None:
 			States.SEND_INVITE: [
 				CallbackQueryHandler(handle_join_button, pattern=f"^{keyboard_model.KeyboardText.JOIN}$"),
 				CallbackQueryHandler(handle_start_button, pattern=f"^{keyboard_model.KeyboardText.START}$"),
-			]
+			],
+			States.GET_GAME_LENGTH: [CallbackQueryHandler(get_length)],
 		},
 		fallbacks=[CommandHandler('cancel', cancel)],
 	)

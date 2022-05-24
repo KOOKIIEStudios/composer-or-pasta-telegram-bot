@@ -32,7 +32,7 @@ class Game:
 	players: dict[int, str]
 	scores: dict[int, int]
 	order: dict[int, int]
-	correct_answer: dict[str, str]
+	correct_answer: tuple[str, str]
 
 	def set_total_rounds(self, length: str) -> None:
 		self.total_rounds = len(self.players) * GameLength[length].value

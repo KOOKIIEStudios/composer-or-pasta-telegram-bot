@@ -25,9 +25,9 @@ JOIN_INVITE_MENU = InlineKeyboardMarkup(
 
 GAME_LENGTH_MENU = InlineKeyboardMarkup(
 	[[
-		InlineKeyboardButton("Short", callback_data=GameLength.SHORT),
-		InlineKeyboardButton("Medium", callback_data=GameLength.MEDIUM),
-		InlineKeyboardButton("Long", callback_data=GameLength.LONG),
+		InlineKeyboardButton("Short", callback_data=GameLength.SHORT.name),
+		InlineKeyboardButton("Medium", callback_data=GameLength.MEDIUM.name),
+		InlineKeyboardButton("Long", callback_data=GameLength.LONG.name),
 	]]
 )
 
