@@ -164,7 +164,6 @@ def start_new_game(update: Update, context: CallbackContext) -> int:
 def get_length(update: Update, context: CallbackContext) -> int:
 	"""Determine the duration of the game"""
 	query = update.callback_query
-	user = query.from_user
 	chat_id = update.effective_chat.id
 
 	query.answer()  # clear the progress bar, if there was a query
@@ -198,7 +197,7 @@ def send_question(update: Update) -> int:
 
 	set_question(game)
 	update.effective_chat.send_message(
-		f"*{game.get_current_player_name()}*, is '_{game.correct_answer[0]}_' the name of a composer or a type of pasta?",
+		f"*{game.get_current_player_name()}*, is '_{game.correct_answer[1]}_' the name of a composer or a type of pasta?",
 		parse_mode="MarkdownV2",
 		reply_markup=keyboard_model.GAME_ANSWER_MENU,
 	)
