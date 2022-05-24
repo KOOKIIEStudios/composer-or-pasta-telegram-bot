@@ -225,6 +225,15 @@ def check_answer(update: Update, _: CallbackContext) -> int:
 	else:
 		query.edit_message_text("Aww.. I'm afraid that's not correct.")
 
+	if game.correct_answer[0] == keyboard_model.KeyboardText.COMPOSER:
+		update.effective_chat.send_message(
+			f"{COMPOSERS.get(game.correct_answer[1]).capitalize()} is an Italian composer."
+		)
+	else:
+		update.effective_chat.send_message(
+			f"{game.correct_answer[1].capitalize()}:\n{PASTAS.get(game.correct_answer[1])}"
+		)
+
 	game.increment_round_number()
 	return send_question(update)
 
