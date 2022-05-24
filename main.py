@@ -236,7 +236,7 @@ def end_game(update: Update) -> int:
 	for player_id, player_name in game.players.items():
 		# old_score = self.get(user_id).get("High score")
 		# 			new_score = high_score if high_score > old_score else old_score
-		optional = "    ___New High Score!_\r__" if game.scores.get(player_id) > data.get_player_high_score(player_id) else ""
+		optional = "    ___New High Score!_\r__" if game.scores.get(player_id) > data.get_player_high_score(player_id).get("High score") else ""
 		message += f"*{player_name}_: {game.scores.get(player_id)}{optional}\n"
 	message += "\nThank you for playing!"
 	update.effective_chat.send_message(message)
