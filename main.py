@@ -196,12 +196,13 @@ def send_question(update: Update) -> int:
 	if game.is_ended():
 		return States.GAME_ENDED
 
-	game.increment_round_number()
 	set_question(game)
 	update.effective_chat.send_message(
-		f"Is '{game.correct_answer[0]}' the name of a composer or a type of pasta?",
+		f"*{game.get_current_player_name()}*, is '_{game.correct_answer[0]}_' the name of a composer or a type of pasta?",
+		parse_mode="MarkdownV2",
 		reply_markup=keyboard_model.GAME_ANSWER_MENU,
 	)
+	game.increment_round_number()
 	return States.CHECK_ANSWER
 
 

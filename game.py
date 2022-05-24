@@ -51,3 +51,9 @@ class Game:
 
 	def is_ended(self) -> bool:
 		return self.total_rounds == self.current_round
+
+	def get_current_player(self) -> int:
+		return self.order.get(self.current_round)
+
+	def get_current_player_name(self) -> str:
+		return self.players.get(self.get_current_player())
