@@ -186,7 +186,23 @@ def get_length(update: Update, context: CallbackContext) -> int:
 		new_message,
 		parse_mode="MarkdownV2",
 	)
-	return States.SEND_QUESTION
+	return send_question(update)
+
+
+def send_question(update: Update) -> int:
+	game = get_game(update.effective_chat.id)
+	if not game:  # no active games - sanity check
+		kookiie_logger.error("No active games")
+	if game.is_ended():
+		return States.GAME_ENDED
+
+	game.increment_round_number()
+	set_question(game)
+	update.effective_chat.send_message(
+		f"Is '{game.correct_answer[0]}' the name of a composer or a type of pasta?",
+		reply_markup=keyboard_model.GAME_ANSWER_MENU,
+	)
+	return States.CHECK_ANSWER
 
 
 def is_player(user_id: int, chat_id: int) -> bool:

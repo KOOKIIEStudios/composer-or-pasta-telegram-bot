@@ -16,9 +16,8 @@ class States(Enum):
 	# Values are arbitrary, but currently in ascending order in case of future expansion
 	SEND_INVITE: int = 0
 	GET_GAME_LENGTH: int = 1
-	SEND_QUESTION: int = 2
-	CHECK_ANSWER: int = 3
-	GAME_ENDED: int = 4
+	CHECK_ANSWER: int = 2
+	GAME_ENDED: int = 3
 
 
 class Game:
