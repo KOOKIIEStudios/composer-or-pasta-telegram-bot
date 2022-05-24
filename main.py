@@ -10,8 +10,13 @@ from telegram.ext import (
 	Updater,
 )
 
-import logger
 import data_handler
+import logger
+from game import (
+	GameLength,
+	States,
+	Game,
+)
 
 
 kookiie_logger = logger.get_logger(__name__)
@@ -22,6 +27,15 @@ data = data_handler.load_player_data()
 COMPOSERS = data_handler.load_composer()
 PASTAS = data_handler.load_pasta()
 kookiie_logger.info("Data loaded.")
+active_games: list[Game] = []
+
+
+def get_game(chat_id: int) -> Game | None:
+	"""Get a particular game from the list of active games"""
+	for game in active_games:
+		if game.chat_id == chat_id:
+			return game
+	return None
 
 
 def fetch_token() -> str:
@@ -57,6 +71,64 @@ def save(update: Update, context: CallbackContext) -> None:
 	data_handler.save_player_data(data)
 
 
+def start_new_game(update: Update, context: CallbackContext) -> int:
+	# Sanity checks:
+	if get_game(update.message.chat_id):
+		update.message.reply_text(
+			"There is already an active game in this chat.\n"
+			"Use the /cancel command, if you would like to terminate the current game."
+		)
+		return ConversationHandler.END
+	chat_type = update.message.chat.type
+	if chat_type == "channel":
+		update.message.reply_text(
+			"ERROR: This feature is not intended for use in channels."
+		)
+		return ConversationHandler.END
+
+	# Start new game sequence:
+	if chat_type == "private":
+		return States.GET_GAME_LENGTH
+	return States.SEND_INVITE  # Group/Supergroup chat
+
+
+def is_player(user_id: int, chat_id: int) -> bool:
+	"""Check if a particular user is currently playing in the active game"""
+	game = get_game(chat_id)
+	if not game:  # no active games - sanity check
+		return False
+	for player in game.players:
+		if user_id == player:
+			return True
+	return False
+
+
+def cancel(update: Update, context: CallbackContext) -> int | None:
+	"""Cancels and ends the game/conversation."""
+	chat_id = update.message.chat_id
+	user = update.message.from_user
+
+	# Nothing to cancel:
+	if not get_game(chat_id):
+		update.message.reply_text(
+			"There is no active game in this chat.\n"
+			"Please use the /newgame command to start a new game."
+		)
+		return ConversationHandler.END
+
+	# Cancel the current active game in the chat:
+	if is_player(user.id, chat_id):
+		kookiie_logger.info("User %s canceled the game/conversation.", user.full_name)
+		update.message.reply_text("The active game has been terminated")
+		return ConversationHandler.END
+
+	update.message.reply_text(
+		f"I'm sorry, {user.first_name}, "
+		"but only people who are playing the game can cancel it."
+	)  # catch-all
+	return
+
+
 def unknown(update: Update, context: CallbackContext) -> None:
 	"""Handle unknown commands"""
 	context.bot.send_message(
@@ -79,6 +151,13 @@ def main() -> None:
 	dispatcher.add_handler(CommandHandler("saved", saved_data))
 	dispatcher.add_handler(CommandHandler("populate", populate))
 	# TODO: Insert conversation handler here
+	conversation_handler = ConversationHandler(
+		entry_points=[CommandHandler("newgame", start_new_game)],
+		states={
+
+		},
+		fallbacks=[CommandHandler('cancel', cancel)],
+	)
 	dispatcher.add_handler(MessageHandler(Filters.command, unknown))
 
 	# Start the Bot

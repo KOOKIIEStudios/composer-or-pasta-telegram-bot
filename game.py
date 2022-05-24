@@ -1,13 +1,24 @@
 """This module contains representation of game attributes"""
-import enum
+from enum import Enum
 
 
-class GameLength(enum.Enum):
+class GameLength(Enum):
 	"""This class models the number of rounds per player"""
 	
-	short: int = 10
-	medium: int = 20
-	long: int = 50
+	SHORT: int = 10
+	MEDIUM: int = 20
+	LONG: int = 50
+
+
+class States(Enum):
+	"""This models the different conversation/game states"""
+
+	# Values are arbitrary, but currently in ascending order in case of future expansion
+	SEND_INVITE: int = 0
+	GET_GAME_LENGTH: int = 1
+	SEND_QUESTION: int = 2
+	CHECK_ANSWER: int = 3
+	GAME_ENDED: int = 4
 
 
 class Game:
