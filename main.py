@@ -230,11 +230,15 @@ def check_answer(update: Update, _: CallbackContext) -> int:
 		kookiie_logger.debug(f"Wrong player clicked on an answer. Expected {game.get_current_player_name()}, Received {user.full_name}")
 		return States.CHECK_ANSWER  # not the intended player for the round
 
-	if query.data == game.correct_answer[0]:
+	# kookiie_logger.debug(f"Expected: {game.correct_answer[0]}, received: {query.data}")
+	if query.data == game.correct_answer[0].value:
 		game.increment_current_player_score()
 		query.edit_message_text("That is the correct answer!")
 	else:
-		query.edit_message_text("Aww.. I'm afraid that's not correct.")
+		query.edit_message_text(
+			"*Aww.. I'm afraid that's not correct._",
+			parse_mode="MarkdownV2",
+		)
 
 	if game.correct_answer[0] == keyboard_model.KeyboardText.COMPOSER:
 		update.effective_chat.send_message(
