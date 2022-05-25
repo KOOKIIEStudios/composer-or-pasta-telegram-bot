@@ -27,9 +27,9 @@ class Game:
 
 	total_rounds: int
 	current_round: int = 0
-	players: dict[int, str]
-	scores: dict[int, int]
-	order: dict[int, int]
+	players: dict[int, str] = {}
+	scores: dict[int, int] = {}
+	order: dict[int, int] = {}
 	correct_answer: tuple[str, str]
 
 	def set_total_rounds(self, length: str) -> None:
