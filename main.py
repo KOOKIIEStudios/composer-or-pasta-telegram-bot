@@ -85,7 +85,7 @@ def start(update: Update, _: CallbackContext) -> None:
 
 def get_player_high_score(update: Update, _: CallbackContext) -> None:
 	"""Send the highest score recorded for the player"""
-	player = data.get_player_high_score(update.message.from_user.id)
+	player = data.get_player(update.message.from_user.id)
 	if not player:
 		update.message.reply_text(
 			f"Hi, {update.message.from_user.full_name}.\n"
@@ -233,11 +233,14 @@ def check_answer(update: Update, _: CallbackContext) -> int:
 	# kookiie_logger.debug(f"Expected: {game.correct_answer[0]}, received: {query.data}")
 	if query.data == game.correct_answer[0].value:
 		game.increment_current_player_score()
-		query.edit_message_text("That is the correct answer!")
+		query.edit_message_text(
+			"<i>That is the correct answer!</i>",
+			parse_mode="HTML",
+		)
 	else:
 		query.edit_message_text(
-			"*Aww.. I'm afraid that's not correct._",
-			parse_mode="MarkdownV2",
+			"<i>Aww... I'm afraid that's not correct.</i>",
+			parse_mode="HTML",
 		)
 
 	if game.correct_answer[0] == keyboard_model.KeyboardText.COMPOSER:
@@ -256,14 +259,12 @@ def check_answer(update: Update, _: CallbackContext) -> int:
 def end_game(update: Update) -> int:
 	"""Tabulate the results, and save it"""
 	game = get_game(update.effective_chat.id)
-	message = f"*GAME OVER*\nScores:\n"
+	message = f"<b>GAME OVER</b>\nScores:\n"
 	for player_id, player_name in game.players.items():
-		# old_score = self.get(user_id).get("High score")
-		# 			new_score = high_score if high_score > old_score else old_score
-		optional = "    ___New High Score!_\r__" if game.scores.get(player_id) > data.get_player_high_score(player_id).get("High score") else ""
-		message += f"*{player_name}_: {game.scores.get(player_id)}{optional}\n"
+		optional = "    <i><u>New High Score!</u></i>" if game.scores.get(player_id) > data.get_player_high_score(player_id) else ""
+		message += f"<i>{player_name}</i>: {game.scores.get(player_id)}{optional}\n"
 	message += "\nThank you for playing!"
-	update.effective_chat.send_message(message)
+	update.effective_chat.send_message(message, parse_mode="HTML")
 
 	# update scores to IO
 	for player_id, player_name in game.players.items():

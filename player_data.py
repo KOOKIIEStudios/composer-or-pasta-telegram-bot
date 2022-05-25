@@ -26,9 +26,16 @@ class PlayerData(dict):
 				}
 			})
 
-	def get_player_high_score(self, user_id: int) -> dict:
-		"""Get the high score for a player"""
+	def get_player(self, user_id: int) -> dict:
+		"""Get the player details"""
 		return self.get(user_id)
+
+	def get_player_high_score(self, user_id: int) -> int:
+		"""Get the player high score; defaults to 0"""
+		player = self.get_player(user_id)
+		if not player:  # No existing records
+			return 0
+		return player.get("High score")
 
 	def get_highest_score(self) -> str:
 		"""Get the player with the highest score, and the relevant details"""
