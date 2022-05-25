@@ -298,8 +298,10 @@ def unknown(update: Update, context: CallbackContext) -> None:
 	"""Handle unknown commands"""
 	context.bot.send_message(
 		chat_id=update.effective_chat.id,
-		text="""Hmm... I don't seem to recognise this command!
-		Perhaps I'm under the influence of the Confundus Charm..."""
+		text=(
+			"Hmm... I don't seem to recognise this command!\n"
+			"Perhaps I'm under the influence of the Confundus Charm..."
+		)
 	)
 
 
