@@ -163,6 +163,11 @@ def start_new_game(update: Update, _: CallbackContext) -> int:
 	# Start new game sequence:
 	active_games.append(Game(update.message.chat_id))
 	if chat_type == "private":
+		add_player(
+			update.message.chat_id,
+			update.message.from_user.id,
+			update.message.from_user.full_name,
+		)
 		return send_duration_menu(update)
 	# if group/supergroup chat, offer multiplayer options:
 	update.message.reply_text(
