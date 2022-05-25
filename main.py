@@ -47,12 +47,12 @@ def get_game(chat_id: int) -> Game | None:
 
 def get_user(chat_id: int, user_id: int) -> int | None:
 	"""Get a user from an active game"""
-	return active_games[chat_id].players.get(user_id)
+	return get_game(chat_id).players.get(user_id)
 
 
 def add_player(chat_id: int, user_id: int, full_name: str) -> None:
 	"""Add a player to an active game"""
-	active_games[chat_id].players[user_id] = full_name
+	get_game(chat_id).players[user_id] = full_name
 
 
 # Question/Answer generation: -------------------------------------------------
