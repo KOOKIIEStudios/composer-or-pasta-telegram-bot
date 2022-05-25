@@ -336,8 +336,8 @@ def main() -> None:
 		entry_points=[CommandHandler("newgame", start_new_game)],
 		states={
 			States.SEND_INVITE: [
-				CallbackQueryHandler(handle_join_button, pattern=f"^{keyboard_model.KeyboardText.JOIN}$"),
-				CallbackQueryHandler(handle_start_button, pattern=f"^{keyboard_model.KeyboardText.START}$"),
+				CallbackQueryHandler(handle_join_button, pattern=f"^{keyboard_model.KeyboardText.JOIN.value}$"),
+				CallbackQueryHandler(handle_start_button, pattern=f"^{keyboard_model.KeyboardText.START.value}$"),
 			],
 			States.GET_GAME_LENGTH: [CallbackQueryHandler(get_length)],
 			States.CHECK_ANSWER: [CallbackQueryHandler(check_answer)],
