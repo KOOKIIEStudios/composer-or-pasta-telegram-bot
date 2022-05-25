@@ -86,11 +86,17 @@ def start(update: Update, _: CallbackContext) -> None:
 def get_player_high_score(update: Update, _: CallbackContext) -> None:
 	"""Send the highest score recorded for the player"""
 	player = data.get_player_high_score(update.message.from_user.id)
-	update.message.reply_text(
-		f"Hi, {player.get('Name')}.\n"
-		f"Your high score is: {player.get('High score')}, "
-		f"through a total of {player.get('Number of games played')} games."
-	)
+	if not player:
+		update.message.reply_text(
+			f"Hi, {update.message.from_user.full_name}.\n"
+			"Your high score is: 0, through a total of 0 games."
+		)
+	else:
+		update.message.reply_text(
+			f"Hi, {player.get('Name')}.\n"
+			f"Your high score is: {player.get('High score')}, "
+			f"through a total of {player.get('Number of games played')} games."
+		)
 
 
 def get_high_score(update: Update, _: CallbackContext) -> None:
