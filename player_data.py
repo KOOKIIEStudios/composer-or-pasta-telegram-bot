@@ -32,5 +32,5 @@ class PlayerData(dict):
 
 	def get_highest_score(self) -> str:
 		"""Get the player with the highest score, and the relevant details"""
-		player = max(self, key=lambda v: self[v]["High score"])
-		return '\n'.join([': '.join(i) for i in sorted(player.items())])
+		player_id = max(self, key=lambda v: self[v]["High score"])
+		return '\n'.join([f"{k}: {v}" for k, v in sorted(self[player_id].items())])
