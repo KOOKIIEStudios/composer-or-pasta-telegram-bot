@@ -17,8 +17,8 @@ class KeyboardText(Enum):
 
 JOIN_INVITE_MENU = InlineKeyboardMarkup(
 	[[
-		InlineKeyboardButton("Join", callback_data=KeyboardText.JOIN),
-		InlineKeyboardButton("Start", callback_data=KeyboardText.START),
+		InlineKeyboardButton("Join", callback_data=KeyboardText.JOIN.value),
+		InlineKeyboardButton("Start", callback_data=KeyboardText.START.value),
 	]]
 )
 
@@ -34,7 +34,7 @@ GAME_LENGTH_MENU = InlineKeyboardMarkup(
 
 GAME_ANSWER_MENU = InlineKeyboardMarkup(
 	[[
-		InlineKeyboardButton("Composer", callback_data=KeyboardText.COMPOSER),
-		InlineKeyboardButton("Pasta", callback_data=KeyboardText.PASTA),
+		InlineKeyboardButton("Composer", callback_data=KeyboardText.COMPOSER.value),
+		InlineKeyboardButton("Pasta", callback_data=KeyboardText.PASTA.value),
 	]]
 )
