@@ -76,6 +76,13 @@ def set_question(game: Game) -> None:
 	game.correct_answer = (keyboard_model.KeyboardText.COMPOSER, composer)
 
 
+def format_composer_answer(game: Game) -> str:
+	composers = COMPOSERS.get(game.correct_answer[1])
+	if len(composers) == 1:
+		return f"{composers[0]} is a composer."
+	return f"{game.correct_answer[1].capitalize()} is the last name for the following composers: {', '.join(composers)}"
+
+
 # Main bot sequence -----------------------------------------------------------
 def fetch_token() -> str:
 	# Load token
@@ -256,7 +263,7 @@ def check_answer(update: Update, _: CallbackContext) -> int:
 	addon = ""
 	if query.data == game.correct_answer[0].value:
 		if game.correct_answer[0] == keyboard_model.KeyboardText.COMPOSER:
-			addon = f"{COMPOSERS.get(game.correct_answer[1]).capitalize()} is a composer."
+			addon = format_composer_answer(game)
 		else:
 			addon = f"{game.correct_answer[1].capitalize()}:\n{PASTAS.get(game.correct_answer[1])}"
 		game.increment_current_player_score()
