@@ -34,6 +34,7 @@ PASTA_KEYS = list(PASTAS.keys())
 kookiie_logger.info("Pasta keys cached.")
 kookiie_logger.info("Data loaded.")
 active_games: list[Game] = []
+JOIN_MENU_STOCK_TEXT = "Tap 'Join' to join the game, and 'Start' once all players have joined."
 
 
 # Active game list-related functions ------------------------------------------
@@ -45,6 +46,10 @@ def get_game(chat_id: int) -> Game | None:
 	return None
 
 
+def remove_current_game(chat_id: int) -> None:
+	active_games.remove(get_game(chat_id))
+
+
 def get_user(chat_id: int, user_id: int) -> int | None:
 	"""Get a user from an active game"""
 	return get_game(chat_id).players.get(user_id)
@@ -53,6 +58,10 @@ def get_user(chat_id: int, user_id: int) -> int | None:
 def add_player(chat_id: int, user_id: int, full_name: str) -> None:
 	"""Add a player to an active game"""
 	get_game(chat_id).players[user_id] = full_name
+
+
+def get_players(chat_id: int) -> list:
+	return list(get_game(chat_id).players.values())
 
 
 # Question/Answer generation: -------------------------------------------------
@@ -115,6 +124,11 @@ def handle_join_button(update: Update, _: CallbackContext) -> int:
 
 	query.answer()  # clear the progress bar, if there was a query
 	add_player(chat_id, user.id, user.full_name)
+	query.edit_message_text(
+		f"{JOIN_MENU_STOCK_TEXT}\n\n<b>Players:</b>\n<pre>{', '.join(get_players(chat_id))}</pre>",
+		parse_mode="HTML",
+		reply_markup=keyboard_model.JOIN_INVITE_MENU,
+	)
 	return States.SEND_INVITE  # continue checking for joins
 
 
@@ -171,7 +185,7 @@ def start_new_game(update: Update, _: CallbackContext) -> int:
 		return send_duration_menu(update)
 	# if group/supergroup chat, offer multiplayer options:
 	update.message.reply_text(
-		"Tap 'Join' to join the game, and 'Start' once all players have joined.",
+		JOIN_MENU_STOCK_TEXT,
 		reply_markup=keyboard_model.JOIN_INVITE_MENU,
 	)
 	return States.SEND_INVITE
@@ -299,6 +313,8 @@ def cancel(update: Update, _: CallbackContext) -> int | None:
 
 	# Cancel the current active game in the chat:
 	if is_player(user.id, chat_id):
+		remove_current_game(chat_id)
+		kookiie_logger.debug(f"Games: {', '.join([str(game.chat_id) for game in active_games])}")
 		kookiie_logger.info("User %s canceled the game/conversation.", user.full_name)
 		update.message.reply_text("The active game has been terminated.")
 		return ConversationHandler.END
@@ -343,6 +359,7 @@ def main() -> None:
 			States.CHECK_ANSWER: [CallbackQueryHandler(check_answer)],
 		},
 		fallbacks=[CommandHandler('cancel', cancel)],
+		per_user=False,
 	)
 	dispatcher.add_handler(conversation_handler)  # For update-handling
 	dispatcher.add_handler(MessageHandler(Filters.command, unknown))
