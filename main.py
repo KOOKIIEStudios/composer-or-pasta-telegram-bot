@@ -1,5 +1,6 @@
 """Simple bot implementation for the Composer or Pasta game"""
 import random
+from time import sleep
 
 from telegram import Update
 from telegram.ext import (
@@ -90,6 +91,7 @@ def fetch_token() -> str:
 def start(update: Update, _: CallbackContext) -> None:
 	"""Greet user when a user first talks to the bot"""
 	update.message.reply_text("To start a game, use the command /newgame")
+	sleep(1)
 
 
 def get_player_high_score(update: Update, _: CallbackContext) -> None:
@@ -106,6 +108,7 @@ def get_player_high_score(update: Update, _: CallbackContext) -> None:
 			f"Your high score is: {player.get('High score')}, "
 			f"through a total of {player.get('Number of games played')} games."
 		)
+	sleep(2)
 
 
 def get_high_score(update: Update, _: CallbackContext) -> None:
@@ -114,6 +117,7 @@ def get_high_score(update: Update, _: CallbackContext) -> None:
 		f"*The highest score in the leaderboard is:*\n{data.get_highest_score()}",
 		parse_mode="MarkdownV2",
 	)
+	sleep(2)
 
 
 def handle_join_button(update: Update, _: CallbackContext) -> int:
@@ -166,12 +170,14 @@ def start_new_game(update: Update, _: CallbackContext) -> int:
 			"There is already an active game in this chat.\n"
 			"Use the /cancel command, if you would like to terminate the current game."
 		)
+		sleep(1)
 		return ConversationHandler.END
 	chat_type = update.message.chat.type
 	if chat_type == "channel":
 		update.message.reply_text(
 			"ERROR: This feature is not intended for use in channels."
 		)
+		sleep(1)
 		return ConversationHandler.END
 
 	# Start new game sequence:
@@ -212,6 +218,7 @@ def get_length(update: Update, _: CallbackContext) -> int:
 		new_message,
 		parse_mode="MarkdownV2",
 	)
+	sleep(3)
 	return send_question(update)
 
 
@@ -229,6 +236,7 @@ def send_question(update: Update) -> int:
 		parse_mode="MarkdownV2",
 		reply_markup=keyboard_model.GAME_ANSWER_MENU,
 	)
+	sleep(1)
 	return States.CHECK_ANSWER
 
 
@@ -241,31 +249,27 @@ def check_answer(update: Update, _: CallbackContext) -> int:
 	query.answer()  # clear the progress bar, if there was a query
 	if not user.id == game.get_current_player():
 		kookiie_logger.debug(f"Wrong player clicked on an answer. Expected {game.get_current_player_name()}, Received {user.full_name} for Round {game.current_round}")
+		sleep(1)
 		return States.CHECK_ANSWER  # not the intended player for the round
 
 	# kookiie_logger.debug(f"Expected: {game.correct_answer[0]}, received: {query.data}")
+	addon = ""
 	if query.data == game.correct_answer[0].value:
+		if game.correct_answer[0] == keyboard_model.KeyboardText.COMPOSER:
+			addon = f"{COMPOSERS.get(game.correct_answer[1]).capitalize()} is a composer."
+		else:
+			addon = f"{game.correct_answer[1].capitalize()}:\n{PASTAS.get(game.correct_answer[1])}"
 		game.increment_current_player_score()
-		query.edit_message_text(
-			"<i>That is the correct answer!</i>",
-			parse_mode="HTML",
-		)
+		base = "<i>That is the correct answer!</i>\n"
 	else:
-		query.edit_message_text(
-			"<i>Aww... I'm afraid that's not correct.</i>",
-			parse_mode="HTML",
-		)
-
-	if game.correct_answer[0] == keyboard_model.KeyboardText.COMPOSER:
-		update.effective_chat.send_message(
-			f"{COMPOSERS.get(game.correct_answer[1]).capitalize()} is an Italian composer."
-		)
-	else:
-		update.effective_chat.send_message(
-			f"{game.correct_answer[1].capitalize()}:\n{PASTAS.get(game.correct_answer[1])}"
-		)
+		base = "<i>Aww... I'm afraid that's not correct.</i>"
+	query.edit_message_text(
+		base + addon,
+		parse_mode="HTML",
+	)
 
 	game.increment_round_number()
+	sleep(4)
 	return send_question(update)
 
 
@@ -283,6 +287,7 @@ def end_game(update: Update) -> int:
 	for player_id, player_name in game.players.items():
 		data.update_player(player_id, player_name, game.scores.get(player_id))
 	data_handler.save_player_data(data)
+	sleep(2)
 	return ConversationHandler.END
 
 
@@ -308,6 +313,7 @@ def cancel(update: Update, _: CallbackContext) -> int | None:
 			"There is no active game in this chat.\n"
 			"Please use the /newgame command to start a new game."
 		)
+		sleep(1)
 		return ConversationHandler.END
 
 	# Cancel the current active game in the chat:
@@ -316,12 +322,14 @@ def cancel(update: Update, _: CallbackContext) -> int | None:
 		kookiie_logger.debug(f"Games: {', '.join([str(game.chat_id) for game in active_games])}")
 		kookiie_logger.info("User %s canceled the game/conversation.", user.full_name)
 		update.message.reply_text("The active game has been terminated.")
+		sleep(2)
 		return ConversationHandler.END
 
 	update.message.reply_text(
 		f"I'm sorry, {user.first_name}, "
 		"but only people who are playing the game can cancel it."
 	)  # catch-all
+	sleep(2)
 	return
 
 
@@ -334,6 +342,7 @@ def unknown(update: Update, context: CallbackContext) -> None:
 			"Perhaps I'm under the influence of the Confundus Charm..."
 		)
 	)
+	sleep(2)
 
 
 def main() -> None:
