@@ -229,7 +229,6 @@ def send_question(update: Update) -> int:
 		parse_mode="MarkdownV2",
 		reply_markup=keyboard_model.GAME_ANSWER_MENU,
 	)
-	game.increment_round_number()
 	return States.CHECK_ANSWER
 
 
@@ -241,7 +240,7 @@ def check_answer(update: Update, _: CallbackContext) -> int:
 
 	query.answer()  # clear the progress bar, if there was a query
 	if not user.id == game.get_current_player():
-		kookiie_logger.debug(f"Wrong player clicked on an answer. Expected {game.get_current_player_name()}, Received {user.full_name}")
+		kookiie_logger.debug(f"Wrong player clicked on an answer. Expected {game.get_current_player_name()}, Received {user.full_name} for Round {game.current_round}")
 		return States.CHECK_ANSWER  # not the intended player for the round
 
 	# kookiie_logger.debug(f"Expected: {game.correct_answer[0]}, received: {query.data}")
