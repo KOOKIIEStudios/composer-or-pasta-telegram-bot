@@ -19,7 +19,7 @@ def load_data(path: Path) -> dict:
 	"""Generic YAML loader"""
 
 	try:
-		with open(path, "r") as file_data:
+		with open(path, "r", encoding="utf-8") as file_data:
 			data = yaml.load(file_data)
 			data = data if data is not None else {}
 		kookiie_logger.debug("Data loaded from file.")

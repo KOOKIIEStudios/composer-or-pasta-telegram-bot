@@ -78,6 +78,7 @@ def set_question(game: Game) -> None:
 
 def format_composer_answer(game: Game) -> str:
 	composers = COMPOSERS.get(game.correct_answer[1])
+	kookiie_logger.debug(f"Composers: {str(composers)}")
 	if len(composers) == 1:
 		return f"{composers[0]} is a composer."
 	
