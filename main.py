@@ -230,7 +230,7 @@ def get_length(update: Update, _: CallbackContext) -> int:
 		new_message,
 		parse_mode="MarkdownV2",
 	)
-	sleep(3)
+	sleep(2)
 	return send_question(update)
 
 
@@ -264,24 +264,26 @@ def check_answer(update: Update, _: CallbackContext) -> int:
 		sleep(1)
 		return States.CHECK_ANSWER  # not the intended player for the round
 
+	# Process composer/pasta details:
+	if game.correct_answer[0] == keyboard_model.KeyboardText.COMPOSER:
+		addon = format_composer_answer(game)
+	else:
+		addon = f"<b>{game.correct_answer[1].capitalize()}:</b>\n{PASTAS.get(game.correct_answer[1])}"
+	# Process whether the provided answer is correct:
 	# kookiie_logger.debug(f"Expected: {game.correct_answer[0]}, received: {query.data}")
-	addon = ""
 	if query.data == game.correct_answer[0].value:
-		if game.correct_answer[0] == keyboard_model.KeyboardText.COMPOSER:
-			addon = format_composer_answer(game)
-		else:
-			addon = f"{game.correct_answer[1].capitalize()}:\n{PASTAS.get(game.correct_answer[1])}"
 		game.increment_current_player_score()
 		base = "<i>That is the correct answer!</i>\n"
 	else:
-		base = "<i>Aww... I'm afraid that's not correct.</i>"
+		base = "<i>Aww... I'm afraid that's not correct.</i>\n"
+	# Feedback:
 	query.edit_message_text(
 		base + addon,
 		parse_mode="HTML",
 	)
 
 	game.increment_round_number()
-	sleep(4)
+	sleep(3)
 	return send_question(update)
 
 
