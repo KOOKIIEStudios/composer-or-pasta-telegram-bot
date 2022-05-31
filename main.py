@@ -69,7 +69,7 @@ def get_players(chat_id: int) -> list:
 # Question/Answer generation: -------------------------------------------------
 def set_question(game: Game) -> None:
 	first_roll = random.randint(1, 100)
-	if first_roll > 80:  # arbitrary number; pasta
+	if first_roll > 50:  # arbitrary number; pasta
 		pasta = random.choice(PASTA_KEYS)
 		game.correct_answer = (keyboard_model.KeyboardText.PASTA, pasta)
 		return
