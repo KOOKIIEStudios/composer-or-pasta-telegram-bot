@@ -162,7 +162,7 @@ def handle_start_button(update: Update, _: CallbackContext) -> int:
 	return send_duration_menu(update)
 
 
-def send_duration_menu(update: Update):
+def send_duration_menu(update: Update) -> int:
 	"""Let the user choose how many rounds to play"""
 	update.effective_chat.send_message(
 		"Select the length/duration that you would like to play.",
@@ -217,7 +217,11 @@ def get_length(update: Update, _: CallbackContext) -> int:
 	query.answer()  # clear the progress bar, if there was a query
 	rounds_per_player = query.data
 	game = get_game(chat_id)
-	game.set_total_rounds(rounds_per_player)
+	try:
+		game.set_total_rounds(rounds_per_player)
+	except KeyError:  # wrong state:
+		kookiie_logger.error("Wrong state in get_length!")
+		return States.GET_GAME_LENGTH
 	game.initialise_order()
 	game.initialise_scores()
 
