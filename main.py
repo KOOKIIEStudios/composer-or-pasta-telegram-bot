@@ -80,7 +80,10 @@ def format_composer_answer(game: Game) -> str:
 	composers = COMPOSERS.get(game.correct_answer[1])
 	if len(composers) == 1:
 		return f"{composers[0]} is a composer."
-	return f"{game.correct_answer[1].capitalize()} is the last name for the following composers: {', '.join(composers)}"
+	
+	temp = composers.copy()
+	temp[-1] = f"and {temp[-1]}"
+	return f"{game.correct_answer[1].capitalize()} is the last name for the following composers: {', '.join(temp)}."
 
 
 # Main bot sequence -----------------------------------------------------------
