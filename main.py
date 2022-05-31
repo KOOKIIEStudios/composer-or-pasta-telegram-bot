@@ -14,6 +14,7 @@ from telegram.ext import (
 )
 
 import data_handler
+# import duplicate_checker
 import logger
 import keyboard_model
 from game import (
@@ -393,4 +394,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+	# duplicate_checker.check(COMPOSER_KEYS, PASTA_KEYS)
 	main()
+	logger.shutdown_logger()
