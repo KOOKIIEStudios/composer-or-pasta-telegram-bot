@@ -4,12 +4,10 @@ This project provides a simple implementation for a Telegram bot that hosts game
 The bot can host one concurrent game per chat, which can be single or multiplayer, across multiple chats. The bot will also store high scores, which persist through restarts.
 
 ## Technical Details
-
 - Python Version: 3.10+
 - Telegram Bot API Wrapper: [python-telegram-bot v13.X](https://github.com/python-telegram-bot/python-telegram-bot)
 
 ## Instructions
-
 1. Create Telegram Bot with the [**Bot Father**](https://core.telegram.org/bots#6-botfather)
 2. Set the bot's commands using `/setcommands` with the **Bot Father**:
     ```
@@ -27,3 +25,12 @@ The bot can host one concurrent game per chat, which can be single or multiplaye
 5. Run the start script (`start.bat` on **Windows** and `start.sh` for **Linux** and **Mac**)
     - Note: Use `chmod 755 start.sh` to give the script permissions
 6. Either DM `/start` the bot with the Telegram handle you've set for the bot in Step 1, or add the bot to a group chat. 
+
+## Acknowledgements and Dedications
+- [Joanna, aka JustAnotherFlutist](https://www.youtube.com/c/JustAnotherFlutist), from whom I'd initially learnt about the game
+- Nicholas, who wanted to play the game after hearing of it
+- The pasta names and details were retrieved from [Wikipedia](https://en.wikipedia.org/wiki/List_of_pasta) on the 22nd May 2022
+- The composer names and details were retrieved from [Wikipedia](https://en.wikipedia.org/wiki/List_of_composers_by_name) on the 27th May 2022
+
+### Disclaimer:
+*This is a simple implementation of the game using Python 3.10 and Python Telegram Bot v13. This project is non-monetised, and provided as is. Every effort has been taken to ensure correctness and reliability of the information provided in the questions and answers within the game. We will not be liable for any special, direct, indirect, or consequential damages or any damages whatsoever resulting from loss of use, data or profits, whether in an action if contract, negligence or other tortious action, arising out of or in connection with the use of our source code (in part or in whole).*
