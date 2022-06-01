@@ -7,6 +7,11 @@ The bot can host one concurrent game per chat, which can be single or multiplaye
 - Python Version: 3.10+
 - Telegram Bot API Wrapper: [python-telegram-bot v13.X](https://github.com/python-telegram-bot/python-telegram-bot)
 
+#### Status: Completed
+
+### Algorithm:
+![Composer or Pasta Telegram Bot Algorithm](https://user-images.githubusercontent.com/25145447/171479342-4446cbc0-5d36-4b6c-9741-48144b1fae05.png)
+
 ## Instructions
 1. Create Telegram Bot with the [**Bot Father**](https://core.telegram.org/bots#6-botfather)
 2. Set the bot's commands using `/setcommands` with the **Bot Father**:
